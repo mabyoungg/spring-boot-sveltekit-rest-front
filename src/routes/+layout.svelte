@@ -1,5 +1,15 @@
-<script>
-    import "$lib/app.css";
+<script lang="ts">
+	import '$lib/app.css';
+
+	const { children } = $props();
 </script>
-  
-<slot />
+
+<header>
+	<a href="/">rest</a>
+	<a href="/member/login">로그인</a>
+	<a href="/member/join">회원가입</a>
+</header>
+
+<main>{@render children()}</main>
+
+<footer>푸터</footer>

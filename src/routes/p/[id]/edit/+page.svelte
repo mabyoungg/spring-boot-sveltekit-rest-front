@@ -17,7 +17,7 @@
 		const titleInput = form.elements.namedItem('title') as HTMLInputElement;
 
 		if (titleInput.value.length === 0) {
-			rq.msgError('title is required');
+			rq.msgError('제목을 입력해주세요.');
 			titleInput.focus();
 			return;
 		}
@@ -27,7 +27,7 @@
 		form.body.value = form.body.value.trim();
 
 		if (form.body.value.length === 0) {
-			rq.msgError('body is required');
+			rq.msgError('내용을 입력해주세요.');
 			form.body.focus();
 			return;
 		}
@@ -36,7 +36,7 @@
 
 		const { data, error } = await rq.apiEndPoints().PUT('/api/v1/posts/{id}', {
 			params: { path: { id: parseInt($page.params.id) } },
-			body: { title, body }
+			body: { title: titleInput.value, body: form.body.value, published: form.published.checked }
 		});
 
 		rq.msgAndRedirect(data, error, '/p/' + $page.params.id);
@@ -48,13 +48,20 @@
 {:then { data: { item: post } }}
 	<form action="" on:submit|preventDefault={submitLoginForm}>
 		<div>
+			<div>공개</div>
+			<input type="checkbox" name="published" value={true} checked={post.published} />
+		</div>
+
+		<div>
 			<div>제목</div>
 			<input type="text" name="title" value={post.title} />
 		</div>
+
 		<div>
 			<div>내용</div>
 			<textarea name="body">{post.body}</textarea>
 		</div>
+
 		<div>
 			<div>저장</div>
 			<button type="submit">저장</button>

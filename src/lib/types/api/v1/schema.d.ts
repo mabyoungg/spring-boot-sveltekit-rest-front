@@ -35,8 +35,8 @@ export interface components {
       statusCode: number;
       msg: string;
       data: components["schemas"]["Empty"];
-      success: boolean;
       fail: boolean;
+      success: boolean;
     };
     EditRequestBody: {
       title: string;
@@ -44,9 +44,9 @@ export interface components {
       published: boolean;
     };
     EditResponseBody: {
-      item: components["schemas"]["PostDto"];
+      item: components["schemas"]["PostWithBodyDto"];
     };
-    PostDto: {
+    PostWithBodyDto: {
       /** Format: int64 */
       id: number;
       /** Format: date-time */
@@ -57,11 +57,11 @@ export interface components {
       authorId: number;
       authorName: string;
       title: string;
-      body: string;
       published: boolean;
       actorCanRead?: boolean;
       actorCanEdit?: boolean;
       actorCanDelete?: boolean;
+      body: string;
     };
     RsDataEditResponseBody: {
       resultCode: string;
@@ -69,8 +69,8 @@ export interface components {
       statusCode: number;
       msg: string;
       data: components["schemas"]["EditResponseBody"];
-      success: boolean;
       fail: boolean;
+      success: boolean;
     };
     LoginRequestBody: {
       username: string;
@@ -95,11 +95,27 @@ export interface components {
       statusCode: number;
       msg: string;
       data: components["schemas"]["LoginResponseBody"];
-      success: boolean;
       fail: boolean;
+      success: boolean;
     };
     GetPostsResponseBody: {
       items: components["schemas"]["PostDto"][];
+    };
+    PostDto: {
+      /** Format: int64 */
+      id: number;
+      /** Format: date-time */
+      createDate: string;
+      /** Format: date-time */
+      modifyDate: string;
+      /** Format: int64 */
+      authorId: number;
+      authorName: string;
+      title: string;
+      published: boolean;
+      actorCanRead?: boolean;
+      actorCanEdit?: boolean;
+      actorCanDelete?: boolean;
     };
     RsDataGetPostsResponseBody: {
       resultCode: string;
@@ -107,11 +123,11 @@ export interface components {
       statusCode: number;
       msg: string;
       data: components["schemas"]["GetPostsResponseBody"];
-      success: boolean;
       fail: boolean;
+      success: boolean;
     };
     GetPostResponseBody: {
-      item: components["schemas"]["PostDto"];
+      item: components["schemas"]["PostWithBodyDto"];
     };
     RsDataGetPostResponseBody: {
       resultCode: string;
@@ -119,8 +135,8 @@ export interface components {
       statusCode: number;
       msg: string;
       data: components["schemas"]["GetPostResponseBody"];
-      success: boolean;
       fail: boolean;
+      success: boolean;
     };
     MeResponseBody: {
       item: components["schemas"]["MemberDto"];
@@ -131,8 +147,8 @@ export interface components {
       statusCode: number;
       msg: string;
       data: components["schemas"]["MeResponseBody"];
-      success: boolean;
       fail: boolean;
+      success: boolean;
     };
   };
   responses: never;

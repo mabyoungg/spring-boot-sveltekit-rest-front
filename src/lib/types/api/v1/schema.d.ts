@@ -13,6 +13,9 @@ export interface paths {
   "/api/v1/posts/{id}/like": {
     post: operations["like"];
   };
+  "/api/v1/posts/temp": {
+    post: operations["makeTemp"];
+  };
   "/api/v1/members/logout": {
     post: operations["logout"];
   };
@@ -41,8 +44,8 @@ export interface components {
       statusCode: number;
       msg: string;
       data: components["schemas"]["Empty"];
-      success: boolean;
       fail: boolean;
+      success: boolean;
     };
     EditRequestBody: {
       title: string;
@@ -80,8 +83,8 @@ export interface components {
       statusCode: number;
       msg: string;
       data: components["schemas"]["EditResponseBody"];
-      success: boolean;
       fail: boolean;
+      success: boolean;
     };
     LikeResponseBody: {
       item: components["schemas"]["PostDto"];
@@ -113,8 +116,20 @@ export interface components {
       statusCode: number;
       msg: string;
       data: components["schemas"]["LikeResponseBody"];
-      success: boolean;
       fail: boolean;
+      success: boolean;
+    };
+    MakeTempResponseBody: {
+      item: components["schemas"]["PostDto"];
+    };
+    RsDataMakeTempResponseBody: {
+      resultCode: string;
+      /** Format: int32 */
+      statusCode: number;
+      msg: string;
+      data: components["schemas"]["MakeTempResponseBody"];
+      fail: boolean;
+      success: boolean;
     };
     LoginRequestBody: {
       username: string;
@@ -140,8 +155,8 @@ export interface components {
       statusCode: number;
       msg: string;
       data: components["schemas"]["LoginResponseBody"];
-      success: boolean;
       fail: boolean;
+      success: boolean;
     };
     GetPostsResponseBody: {
       items: components["schemas"]["PostDto"][];
@@ -152,8 +167,8 @@ export interface components {
       statusCode: number;
       msg: string;
       data: components["schemas"]["GetPostsResponseBody"];
-      success: boolean;
       fail: boolean;
+      success: boolean;
     };
     GetPostResponseBody: {
       item: components["schemas"]["PostWithBodyDto"];
@@ -164,8 +179,8 @@ export interface components {
       statusCode: number;
       msg: string;
       data: components["schemas"]["GetPostResponseBody"];
-      success: boolean;
       fail: boolean;
+      success: boolean;
     };
     MeResponseBody: {
       item: components["schemas"]["MemberDto"];
@@ -176,8 +191,8 @@ export interface components {
       statusCode: number;
       msg: string;
       data: components["schemas"]["MeResponseBody"];
-      success: boolean;
       fail: boolean;
+      success: boolean;
     };
     CancelLikeResponseBody: {
       item: components["schemas"]["PostDto"];
@@ -188,8 +203,8 @@ export interface components {
       statusCode: number;
       msg: string;
       data: components["schemas"]["CancelLikeResponseBody"];
-      success: boolean;
       fail: boolean;
+      success: boolean;
     };
   };
   responses: never;
@@ -284,6 +299,22 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["RsDataLikeResponseBody"];
+        };
+      };
+      /** @description Internal Server Error */
+      500: {
+        content: {
+          "*/*": components["schemas"]["RsDataEmpty"];
+        };
+      };
+    };
+  };
+  makeTemp: {
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["RsDataMakeTempResponseBody"];
         };
       };
       /** @description Internal Server Error */

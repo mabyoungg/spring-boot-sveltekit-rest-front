@@ -29,7 +29,7 @@
 			});
 	}
 
-	$effect(async () => {
+	rq.effect(async () => {
 		const [
 			{ default: Editor },
 			{ default: codeSyntaxHighlight },
@@ -319,12 +319,7 @@
 						}
 					},
 					language: 'ko-KR',
-					placeholder: stripIndent(`
-              $$config
-              title: 제목
-              open: true
-              $$
-              `).trim(),
+					placeholder: stripIndent(`내용을 입력해주세요.`).trim(),
 					...editorConfig
 				});
 
@@ -345,7 +340,9 @@
 				command: 'openImageUploader'
 			}
 		);
+	});
 
+	rq.effect(() => {
 		return () => {
 			editor.destroy();
 		};

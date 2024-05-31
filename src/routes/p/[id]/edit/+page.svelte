@@ -2,6 +2,10 @@
 	import { page } from '$app/stores';
 	import rq from '$lib/rq/rq.svelte';
 
+	import ToastUiEditor from '$lib/components/ToastUiEditor.svelte';
+
+	let toastUiEditor: any | undefined;
+
 	async function load() {
 		if (import.meta.env.SSR) throw new Error('CSR ONLY');
 
@@ -26,19 +30,21 @@
 
 		const title = titleInput.value.trim();
 
-		form.body.value = form.body.value.trim();
+		toastUiEditor.editor.setMarkdown(toastUiEditor.editor.getMarkdown().trim());
 
-		if (form.body.value.length === 0) {
+		if (toastUiEditor.editor.getMarkdown().trim().length === 0) {
 			rq.msgError('내용을 입력해주세요.');
-			form.body.focus();
+			toastUiEditor.editor.focus();
 			return;
 		}
 
-		const body = form.body.value;
-
 		const { data, error } = await rq.apiEndPoints().PUT('/api/v1/posts/{id}', {
 			params: { path: { id: parseInt($page.params.id) } },
-			body: { title: titleInput.value, body: form.body.value, published: form.published.checked }
+			body: {
+				title: titleInput.value,
+				body: toastUiEditor.editor.getMarkdown().trim(),
+				published: form.published.checked
+			}
 		});
 
 		rq.msgAndRedirect(data, error, '/p/' + $page.params.id);
@@ -71,7 +77,9 @@
 
 		<div>
 			<div>내용</div>
-			<textarea name="body">{post.body}</textarea>
+			{#key post.id}
+				<ToastUiEditor bind:this={toastUiEditor} body={post.body} />
+			{/key}
 		</div>
 
 		<div>

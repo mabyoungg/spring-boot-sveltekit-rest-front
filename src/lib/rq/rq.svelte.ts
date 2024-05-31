@@ -1,4 +1,5 @@
 import { goto } from '$app/navigation';
+import type { Page } from '@sveltejs/kit';
 
 import type { components, paths } from '$lib/types/api/v1/schema';
 import createClient from 'openapi-fetch';
@@ -18,6 +19,20 @@ class Rq {
 
 	constructor() {
 		this.member = this.makeReactivityMember();
+	}
+
+	public isAdmin() {
+		if (this.isLogout()) return false;
+
+		return this.member.authorities.includes('ROLE_ADMIN');
+	}
+
+	public isAdmPage($page: Page<Record<string, string>>) {
+		return $page.url.pathname.startsWith('/adm');
+	}
+
+	public isUsrPage($page: Page<Record<string, string>>) {
+		return !this.isAdmPage($page);
 	}
 
 	// URL

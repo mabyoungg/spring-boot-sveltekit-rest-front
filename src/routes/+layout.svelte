@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
 
 	import '$lib/app.css';
 	import rq from '$lib/rq/rq.svelte';
@@ -35,12 +36,23 @@
 				class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
 			>
 				<li><a href="/p/list"><i class="fa-solid fa-list"></i> 글</a></li>
+				{#if rq.isAdmPage($page)}
+					<li><a href="/"><i class="fa-solid fa-house"></i> 홈</a></li>
+				{/if}
+				{#if rq.isUsrPage($page) && rq.isAdmin()}
+					<li><a href="/adm"><i class="fa-solid fa-gauge"></i> 관리자</a></li>
+				{/if}
 			</ul>
 		</div>
 	</div>
 
 	<div class="flex-1">
-		<a href="/" class="btn btn-ghost text-md">rest</a>
+		{#if rq.isUsrPage($page)}
+			<a href="/" class="btn btn-ghost text-md">REST</a>
+		{/if}
+		{#if rq.isAdmPage($page)}
+			<a href="/adm" class="btn btn-ghost text-md">REST ADMIN</a>
+		{/if}
 	</div>
 
 	<div class="flex-none">
@@ -75,7 +87,7 @@
 			>
 				{#if rq.isLogout()}
 					<li>
-						<a href="/member/login"><i class="fa-solid fa-right-to-bracket"></i> 로그인</a>
+						<a href="/member/login"><i class="fa-solid fa-right-to-bracket"></i> 로그인 & 가입</a>
 					</li>
 				{/if}
 				{#if rq.isLogin()}
@@ -83,7 +95,12 @@
 						<a href="/member/me"><i class="fa-solid fa-user"></i> {rq.member.name}</a>
 					</li>
 					<li>
-						<button on:click={() => rq.logoutAndRedirect('/')}
+						<button onclick={() => rq.goToTempPostEditPage()}>
+							<i class="fa-solid fa-pen"></i> 글 쓰기
+						</button>
+					</li>
+					<li>
+						<button onclick={() => rq.logoutAndRedirect('/')}
 							><i class="fa-solid fa-right-from-bracket"></i> 로그아웃</button
 						>
 					</li>
@@ -93,6 +110,6 @@
 	</div>
 </header>
 
-<main>{@render children()}</main>
+<main class="flex-grow flex flex-col">{@render children()}</main>
 
-<footer>푸터</footer>
+<footer></footer>

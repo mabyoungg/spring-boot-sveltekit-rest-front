@@ -51,6 +51,33 @@
 
 		callback(data!);
 	}
+
+	async function submitWriteCommentForm(event: Event) {
+		event.preventDefault();
+
+		const form = event.target as HTMLFormElement;
+
+		const bodyInput = form.elements.namedItem('body') as HTMLTextAreaElement;
+
+		if (bodyInput.value.length === 0) {
+			rq.msgError('내용을 입력해주세요.');
+			bodyInput.focus();
+			return;
+		}
+
+		const { data, error } = await rq.apiEndPoints().POST('/api/v1/postComments/{postId}', {
+			params: { path: { postId: parseInt($page.params.id) } },
+			body: {
+				body: bodyInput.value
+			}
+		});
+
+		bodyInput.value = '';
+
+		rq.msgInfo(data!.msg);
+
+		postComments.unshift(data!.data.item);
+	}
 </script>
 
 {#await loadPost()}
@@ -83,6 +110,21 @@
 	{error.msg}
 {/await}
 
+<div>
+	<h1 class="font-bold text-2xl">댓글작성</h1>
+
+	<form onsubmit={submitWriteCommentForm}>
+		<div>
+			<div>내용</div>
+			<textarea name="body"></textarea>
+		</div>
+
+		<div>
+			<button type="submit">작성</button>
+		</div>
+	</form>
+</div>
+
 {#await loadPostComments()}
 	<div>loading...</div>
 {:then { }}
@@ -90,7 +132,7 @@
 
 	<div>
 		{#each postComments as postComment}
-			<div>
+			<div class="border">
 				<div>번호 : {postComment.id}</div>
 				<div>작성 : {prettyDateTime(postComment.createDate)}</div>
 				<div>수정 : {prettyDateTime(postComment.modifyDate)}</div>

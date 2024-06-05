@@ -1,10 +1,74 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import rq from '$lib/rq/rq.svelte';
+	import hotkeys from 'hotkeys-js';
 
 	import ToastUiEditor from '$lib/components/ToastUiEditor.svelte';
 
 	let toastUiEditor: any | undefined;
+	let oldBody: string = '';
+
+	function saveToLocalStorage(id: number, body: string) {
+		const key = 'posts_' + id;
+		const existingData = localStorage.getItem(key);
+
+		const posts = existingData ? JSON.parse(existingData) : [];
+
+		posts.push({
+			id,
+			body: body,
+			date: new Date().toISOString()
+		});
+
+		if (posts.length > 10) {
+			posts.shift();
+		}
+
+		localStorage.setItem(key, JSON.stringify(posts));
+	}
+
+	async function Post__saveBody() {
+		const newBody = toastUiEditor.editor.getMarkdown().trim();
+
+		if (oldBody === newBody) {
+			return;
+		}
+
+		const { data, error } = await rq.apiEndPoints().PUT('/api/v1/posts/{id}/body', {
+			params: { path: { id: parseInt($page.params.id) } },
+			body: { body: newBody }
+		});
+
+		oldBody = newBody;
+
+		saveToLocalStorage(parseInt($page.params.id), newBody);
+
+		if (data) {
+			rq.msgInfo(data.msg);
+		}
+	}
+
+	rq.effect(() => {
+		hotkeys.filter = function (event) {
+			return true;
+		};
+
+		hotkeys('ctrl+s,cmd+s', 'postEdit', function (event, handler) {
+			Post__saveBody();
+			event.preventDefault();
+		});
+
+		hotkeys('ctrl+q,cmd+q', 'postEdit', function (event, handler) {
+			toastUiEditor.switchTab();
+			event.preventDefault();
+		});
+
+		hotkeys.setScope('postEdit');
+
+		return () => {
+			hotkeys.deleteScope('postEdit');
+		};
+	});
 
 	async function load() {
 		if (import.meta.env.SSR) throw new Error('CSR ONLY');
@@ -78,7 +142,7 @@
 		<div>
 			<div>내용</div>
 			{#key post.id}
-				<ToastUiEditor bind:this={toastUiEditor} body={post.body} />
+				<ToastUiEditor bind:this={toastUiEditor} body={post.body} saveBody={Post__saveBody} />
 			{/key}
 		</div>
 

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import rq from '$lib/rq/rq.svelte';
+	import hotkeys from 'hotkeys-js';
 	import ToastUiEditor from '$lib/components/ToastUiEditor.svelte';
 	import { prettyDateTime } from '$lib/utils';
 	import type { components } from '$lib/types/api/v1/schema';
@@ -8,6 +9,7 @@
 	const toastUiEditors = $state<Record<number, any>>({});
 
 	let toastUiEditor = $state<any | undefined>();
+	let writeCommentToastUiEditor = $state<any | undefined>();
 
 	let tempPostCommentId = $state(0);
 
@@ -20,7 +22,41 @@
 
 		if (error) throw error;
 
+		Post__lastModified = data!.data.item.modifyDate;
+		Post__loadLatestBody();
+
 		return data!;
+	}
+
+	let Post__lastModified = '';
+
+	async function Post__loadLatestBody() {
+		// 에디터 자체가 아직 로드가 안되었다면 1초 후에 재시도
+		if (toastUiEditor === undefined) {
+			setTimeout(Post__loadLatestBody, 1000);
+			return;
+		}
+
+		// 브라우저 자체가 숨겨져있거나, 뷰어가 풀스크린이 아니라면 5초 후에 재시도
+		if (document.hidden || !toastUiEditor.isFullScreen) {
+			setTimeout(Post__loadLatestBody, 5000);
+			return;
+		}
+
+		const postId = $page.params.id;
+
+		const { data, error } = await rq.apiEndPoints().GET('/api/v1/posts/{id}/body', {
+			params: { path: { id: parseInt(postId) }, query: { lastModifyDate: Post__lastModified } }
+		});
+
+		if (data) {
+			rq.msgInfo(data.msg);
+
+			toastUiEditor.editor.setMarkdown(data.data.body);
+
+			Post__lastModified = data.data.modifyDate;
+		}
+		setTimeout(Post__loadLatestBody, 5000);
 	}
 
 	let postComments = $state<components['schemas']['PostCommentDto'][]>([]);
@@ -58,16 +94,16 @@
 		callback(data!);
 	}
 
-	async function submitWriteCommentForm(event: Event) {
-		event.preventDefault();
+	async function submitWriteCommentForm() {
+		// event.preventDefault();
 
-		const form = event.target as HTMLFormElement;
+		writeCommentToastUiEditor.editor.setMarkdown(
+			writeCommentToastUiEditor.editor.getMarkdown().trim()
+		);
 
-		toastUiEditor.editor.setMarkdown(toastUiEditor.editor.getMarkdown().trim());
-
-		if (toastUiEditor.editor.getMarkdown().trim().length === 0) {
+		if (writeCommentToastUiEditor.editor.getMarkdown().trim().length === 0) {
 			rq.msgError('내용을 입력해주세요.');
-			toastUiEditor.editor.focus();
+			writeCommentToastUiEditor.editor.focus();
 			return;
 		}
 
@@ -76,11 +112,11 @@
 			.PUT('/api/v1/postComments/{postId}/{postCommentId}', {
 				params: { path: { postId: parseInt($page.params.id), postCommentId: tempPostCommentId } },
 				body: {
-					body: toastUiEditor.editor.getMarkdown()
+					body: writeCommentToastUiEditor.editor.getMarkdown()
 				}
 			});
 
-		toastUiEditor.editor.setMarkdown('');
+		writeCommentToastUiEditor.editor.setMarkdown('');
 		tempPostCommentId = 0;
 
 		rq.msgInfo(data!.msg);
@@ -88,13 +124,8 @@
 		postComments.unshift(data!.data.item);
 	}
 
-	async function submitEditCommentForm(event: Event) {
-		event.preventDefault();
-
-		const form = event.target as HTMLFormElement;
-
-		const idInput = form.elements.namedItem('id') as HTMLInputElement;
-		const id = parseInt(idInput.value);
+	async function submitEditCommentForm(id: number) {
+		// event.preventDefault();
 
 		const toastUiEditor = toastUiEditors[id];
 
@@ -134,6 +165,23 @@
 			toastUiEditor.editor.focus();
 		}, 100);
 	}
+
+	rq.effect(() => {
+		hotkeys.filter = function (event) {
+			return true;
+		};
+
+		hotkeys('ctrl+d,cmd+d', 'postDetail', function (event, handler) {
+			toastUiEditor.toggleFullScreen();
+			event.preventDefault();
+		});
+
+		hotkeys.setScope('postDetail');
+
+		return () => {
+			hotkeys.deleteScope('postDetail');
+		};
+	});
 </script>
 
 {#await loadPost()}
@@ -150,12 +198,25 @@
 	<div>추천 : {post.likesCount}</div>
 
 	{#key post.id}
-		<ToastUiEditor body={post.body} viewer={true} />
+		<ToastUiEditor bind:this={toastUiEditor} body={post.body} viewer={true}>
+			<div slot="beforeContent">
+				<!-- svelte-ignore a11y_click_events_have_key_events -->
+				<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+				<h1>
+					제목 : {post.title},
+					<div class="tooltip tooltip-right" data-tip="Ctrl + d, Cmd + d">
+						<button class="btn btn-sm" on:click={() => toastUiEditor.toggleFullScreen()}
+							>전체화면</button
+						>
+					</div>
+				</h1>
+			</div>
+		</ToastUiEditor>
 	{/key}
 
 	<div>
 		{#if post.actorCanDelete}
-			<button onclick={() => rq.confirmAndDeletePost(post, '/p/list')}>삭제</button>
+			<button on:click={() => rq.confirmAndDeletePost(post, '/p/list')}>삭제</button>
 		{/if}
 
 		{#if post.actorCanEdit}
@@ -169,16 +230,20 @@
 <div>
 	<h1 class="font-bold text-2xl">댓글작성</h1>
 
-	<form onsubmit={submitWriteCommentForm}>
+	<form on:submit|preventDefault={submitWriteCommentForm}>
 		{#if tempPostCommentId == 0}
-			<input type="text" class="input input-bordered" onclick={() => makeTempPostComment()} />
+			<input type="text" class="input input-bordered" on:click={() => makeTempPostComment()} />
 		{/if}
 
 		{#if tempPostCommentId > 0}
 			<div>
 				<div>내용</div>
 				{#key tempPostCommentId}
-					<ToastUiEditor bind:this={toastUiEditor} body={''} />
+					<ToastUiEditor
+						bind:this={writeCommentToastUiEditor}
+						body={''}
+						saveBody={() => submitWriteCommentForm()}
+					/>
 				{/key}
 			</div>
 
@@ -214,7 +279,7 @@
 					<div>
 						{#if postComment.actorCanDelete}
 							<button
-								onclick={() =>
+								on:click={() =>
 									confirmAndDeletePostComment(postComment, (data) => {
 										rq.msgInfo(data.msg);
 										postComments.splice(postComments.indexOf(postComment), 1);
@@ -223,14 +288,14 @@
 						{/if}
 
 						{#if postComment.actorCanEdit}
-							<button onclick={() => (postComment.editing = !postComment.editing)}>수정</button>
+							<button on:click={() => (postComment.editing = !postComment.editing)}>수정</button>
 						{/if}
 					</div>
 				{/if}
 
 				{#if postComment.editing}
 					<div>
-						<form onsubmit={submitEditCommentForm}>
+						<form on:submit|preventDefault={() => submitEditCommentForm(postComment.id)}>
 							<input type="hidden" name="id" value={postComment.id} />
 
 							<div>
@@ -239,13 +304,14 @@
 									<ToastUiEditor
 										bind:this={toastUiEditors[postComment.id]}
 										body={postComment.body}
+										saveBody={() => submitEditCommentForm(postComment.id)}
 									/>
 								{/key}
 							</div>
 
 							<div>
 								<button type="submit">수정</button>
-								<button type="button" onclick={() => (postComment.editing = !postComment.editing)}
+								<button type="button" on:click={() => (postComment.editing = !postComment.editing)}
 									>수정취소</button
 								>
 							</div>

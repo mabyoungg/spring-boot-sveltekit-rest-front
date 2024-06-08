@@ -49,6 +49,10 @@ export interface paths {
     /** 글 다건조회 */
     get: operations["getPosts"];
   };
+  "/api/v1/posts/mine": {
+    /** 내글 다건조회 */
+    get: operations["getMine"];
+  };
   "/api/v1/postComments/{postId}": {
     /** 댓글 다건조회 */
     get: operations["getPosts_1"];
@@ -74,8 +78,6 @@ export interface components {
       statusCode: number;
       msg: string;
       data: components["schemas"]["Empty"];
-      success: boolean;
-      fail: boolean;
     };
     EditRequestBody: {
       title: string;
@@ -113,8 +115,6 @@ export interface components {
       statusCode: number;
       msg: string;
       data: components["schemas"]["EditResponseBody"];
-      success: boolean;
-      fail: boolean;
     };
     EditBodyRequestBody: {
       body: string;
@@ -147,8 +147,6 @@ export interface components {
       statusCode: number;
       msg: string;
       data: components["schemas"]["EditCommentResponseBody"];
-      success: boolean;
-      fail: boolean;
     };
     LikeResponseBody: {
       item: components["schemas"]["PostDto"];
@@ -180,8 +178,6 @@ export interface components {
       statusCode: number;
       msg: string;
       data: components["schemas"]["LikeResponseBody"];
-      success: boolean;
-      fail: boolean;
     };
     MakeTempResponseBody: {
       item: components["schemas"]["PostDto"];
@@ -192,8 +188,6 @@ export interface components {
       statusCode: number;
       msg: string;
       data: components["schemas"]["MakeTempResponseBody"];
-      success: boolean;
-      fail: boolean;
     };
     RsDataWriteCommentResponseBody: {
       resultCode: string;
@@ -201,8 +195,6 @@ export interface components {
       statusCode: number;
       msg: string;
       data: components["schemas"]["WriteCommentResponseBody"];
-      success: boolean;
-      fail: boolean;
     };
     WriteCommentResponseBody: {
       item: components["schemas"]["PostCommentDto"];
@@ -231,8 +223,6 @@ export interface components {
       statusCode: number;
       msg: string;
       data: components["schemas"]["LoginResponseBody"];
-      success: boolean;
-      fail: boolean;
     };
     GetPostsResponseBody: {
       itemPage: components["schemas"]["PageDtoPostDto"];
@@ -254,8 +244,6 @@ export interface components {
       statusCode: number;
       msg: string;
       data: components["schemas"]["GetPostsResponseBody"];
-      success: boolean;
-      fail: boolean;
     };
     GetPostResponseBody: {
       item: components["schemas"]["PostWithBodyDto"];
@@ -266,8 +254,6 @@ export interface components {
       statusCode: number;
       msg: string;
       data: components["schemas"]["GetPostResponseBody"];
-      success: boolean;
-      fail: boolean;
     };
     GetPostBodyResponseBody: {
       /** Format: date-time */
@@ -280,8 +266,16 @@ export interface components {
       statusCode: number;
       msg: string;
       data: components["schemas"]["GetPostBodyResponseBody"];
-      success: boolean;
-      fail: boolean;
+    };
+    GetMineResponseBody: {
+      itemPage: components["schemas"]["PageDtoPostDto"];
+    };
+    RsDataGetMineResponseBody: {
+      resultCode: string;
+      /** Format: int32 */
+      statusCode: number;
+      msg: string;
+      data: components["schemas"]["GetMineResponseBody"];
     };
     GetPostCommentsResponseBody: {
       items: components["schemas"]["PostCommentDto"][];
@@ -292,8 +286,6 @@ export interface components {
       statusCode: number;
       msg: string;
       data: components["schemas"]["GetPostCommentsResponseBody"];
-      success: boolean;
-      fail: boolean;
     };
     MeResponseBody: {
       item: components["schemas"]["MemberDto"];
@@ -304,8 +296,6 @@ export interface components {
       statusCode: number;
       msg: string;
       data: components["schemas"]["MeResponseBody"];
-      success: boolean;
-      fail: boolean;
     };
     CancelLikeResponseBody: {
       item: components["schemas"]["PostDto"];
@@ -316,8 +306,6 @@ export interface components {
       statusCode: number;
       msg: string;
       data: components["schemas"]["CancelLikeResponseBody"];
-      success: boolean;
-      fail: boolean;
     };
   };
   responses: never;
@@ -621,6 +609,30 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["RsDataGetPostsResponseBody"];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        content: {
+          "application/json": components["schemas"]["RsDataEmpty"];
+        };
+      };
+    };
+  };
+  /** 내글 다건조회 */
+  getMine: {
+    parameters: {
+      query?: {
+        page?: number;
+        kw?: string;
+        kwType?: "ALL" | "TITLE" | "BODY" | "NAME";
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["RsDataGetMineResponseBody"];
         };
       };
       /** @description Bad Request */

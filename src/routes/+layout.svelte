@@ -12,7 +12,7 @@
 	});
 </script>
 
-<header class="navbar bg-base-100">
+<header class="navbar bg-base-100 shadow sticky top-0">
 	<div class="flex-none">
 		<div class="dropdown">
 			<div tabindex="0" role="button" class="btn btn-ghost btn-circle">
@@ -37,7 +37,7 @@
 			>
 				<li><a href="/p/list"><i class="fa-solid fa-list"></i> 글</a></li>
 				{#if rq.isLogin()}
-					<li><a href="/p/mine"><i class="fa-solid fa-list-check"></i> 내글</a></li>
+					<li><a href="/p/mine"><i class="fa-solid fa-list-check"></i> 내 글</a></li>
 					<li>
 						<button onclick={() => rq.goToTempPostEditPage()}>
 							<i class="fa-solid fa-pen"></i> 글 쓰기

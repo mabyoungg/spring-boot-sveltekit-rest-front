@@ -1,5 +1,5 @@
 <div class="flex-grow flex justify-center items-center">
-	<div>
+	<div class="max-w-sm">
 		<div class="text-center">
 			<div class="font-bold text-lg">테스트 블로그</div>
 			<div class="mt-3 text-gray-400">에디터와 뷰어 제공</div>

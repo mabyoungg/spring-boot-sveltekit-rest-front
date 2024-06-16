@@ -205,6 +205,7 @@
 				<div class="card-body">
 					<div class="detail grid grid-cols-[repeat(auto-fit,minmax(100px,1fr))] gap-3">
 						<div class="form-control">
+							<!-- svelte-ignore a11y_label_has_associated_control -->
 							<label class="label">
 								<span class="label-text">번호</span>
 							</label>
@@ -212,6 +213,7 @@
 						</div>
 
 						<div class="form-control">
+							<!-- svelte-ignore a11y_label_has_associated_control -->
 							<label class="label">
 								<span class="label-text">작성일</span>
 							</label>
@@ -219,6 +221,7 @@
 						</div>
 
 						<div class="form-control">
+							<!-- svelte-ignore a11y_label_has_associated_control -->
 							<label class="label">
 								<span class="label-text">작성자</span>
 							</label>
@@ -226,6 +229,7 @@
 						</div>
 
 						<div class="form-control">
+							<!-- svelte-ignore a11y_label_has_associated_control -->
 							<label class="label">
 								<span class="label-text">공개여부</span>
 							</label>
@@ -237,10 +241,18 @@
 						</div>
 
 						<div class="form-control col-span-full">
+							<!-- svelte-ignore a11y_label_has_associated_control -->
 							<label class="label">
 								<span class="label-text">제목</span>
 							</label>
 							<div>{post.title}</div>
+						</div>
+
+						<div class="form-control col-span-full">
+							<div class="label">
+								<span class="label-text">태그</span>
+							</div>
+							<div>{post.tagContents.map((tag) => `#${tag}`).join(' ')}</div>
 						</div>
 
 						<div class="flex gap-2">
@@ -257,6 +269,7 @@
 						</div>
 
 						<div class="form-control col-span-full">
+							<!-- svelte-ignore a11y_label_has_associated_control -->
 							<label class="label">
 								<span class="label-text">내용</span>
 							</label>

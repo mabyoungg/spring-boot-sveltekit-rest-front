@@ -82,6 +82,7 @@ export interface components {
     EditRequestBody: {
       title: string;
       body: string;
+      tagContents: string[];
       published: boolean;
       listed: boolean;
     };
@@ -104,6 +105,7 @@ export interface components {
       listed: boolean;
       /** Format: int64 */
       likesCount: number;
+      tagContents: string[];
       actorCanRead?: boolean;
       actorCanEdit?: boolean;
       actorCanDelete?: boolean;
@@ -169,6 +171,7 @@ export interface components {
       listed: boolean;
       /** Format: int64 */
       likesCount: number;
+      tagContents: string[];
       actorCanRead?: boolean;
       actorCanEdit?: boolean;
       actorCanDelete?: boolean;

@@ -105,6 +105,23 @@
 			return;
 		}
 
+		for (let i = 1; true; i++) {
+			if (!form[`video__${i}`]) break;
+
+			if (form[`video__${i}`].files.length > 0) {
+				const formData = new FormData();
+				formData.append('file', form[`video__${i}`].files[0]);
+
+				rq.msgInfo(`영상 ${i}(을)를 업로드 중입니다. 잠시만 기다려주세요.`);
+
+				await rq.apiEndPoints().PUT('/api/v1/posts/{id}/mainVideo/{fileNo}', {
+					params: { path: { id: parseInt($page.params.id), fileNo: i } },
+					body: formData as any,
+					bodySerializer: (body) => body
+				});
+			}
+		}
+
 		const { data, error } = await rq.apiEndPoints().PUT('/api/v1/posts/{id}', {
 			params: { path: { id: parseInt($page.params.id) } },
 			body: {
@@ -183,7 +200,13 @@
 					<div class="label">
 						<span class="label-text">제목</span>
 					</div>
-					<input class="input input-bordered" type="text" name="title" value={post.title} />
+					<input
+						class="input input-bordered"
+						type="text"
+						name="title"
+						value={post.title}
+						maxlength="150"
+					/>
 				</label>
 
 				<label class="form-control">
@@ -195,6 +218,7 @@
 						type="text"
 						name="tagContents"
 						value={post.tagContents.map((tag) => `#${tag}`).join(' ')}
+						maxlength="50"
 					/>
 					<div class="label">
 						<span class="label-text-alt"> 구분자는 `#` 입니다. </span>
@@ -217,6 +241,26 @@
 						</span>
 					</div>
 				</div>
+
+				{#each [1, 2] as videoIndex}
+					<div class="form-control">
+						<div class="label">
+							<span class="label-text">영상 {videoIndex}</span>
+						</div>
+						<div>
+							<input
+								class="file-input file-input-bordered"
+								type="file"
+								name={`video__${videoIndex}`}
+							/>
+						</div>
+						<div class="label">
+							<span class="label-text-alt">
+								mp4 파일만 업로드 가능합니다. 파일 업로드는 50MB 이하만 가능합니다.
+							</span>
+						</div>
+					</div>
+				{/each}
 
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 					<button

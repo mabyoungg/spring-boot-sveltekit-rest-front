@@ -13,6 +13,10 @@ export interface paths {
     /** 글 삭제 */
     delete: operations["delete"];
   };
+  "/api/v1/posts/{id}/mainVideo/{fileNo}": {
+    /** 글의 비디오 업로드 */
+    put: operations["uploadVideo"];
+  };
   "/api/v1/posts/{id}/body": {
     /** 글(본문) 단건조회 */
     get: operations["getPostBody"];
@@ -395,6 +399,37 @@ export interface operations {
     parameters: {
       path: {
         id: number;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["RsDataEmpty"];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        content: {
+          "application/json": components["schemas"]["RsDataEmpty"];
+        };
+      };
+    };
+  };
+  /** 글의 비디오 업로드 */
+  uploadVideo: {
+    parameters: {
+      path: {
+        id: number;
+        fileNo: number;
+      };
+    };
+    requestBody?: {
+      content: {
+        "multipart/form-data": {
+          /** Format: binary */
+          file: string;
+        };
       };
     };
     responses: {

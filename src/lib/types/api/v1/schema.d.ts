@@ -16,6 +16,8 @@ export interface paths {
   "/api/v1/posts/{id}/mainVideo/{fileNo}": {
     /** 글의 비디오 업로드 */
     put: operations["uploadVideo"];
+    /** 글의 비디오 삭제 */
+    delete: operations["deleteVideo"];
   };
   "/api/v1/posts/{id}/body": {
     /** 글(본문) 단건조회 */
@@ -469,6 +471,29 @@ export interface operations {
           /** Format: binary */
           file: string;
         };
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["RsDataEmpty"];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        content: {
+          "application/json": components["schemas"]["RsDataEmpty"];
+        };
+      };
+    };
+  };
+  /** 글의 비디오 삭제 */
+  deleteVideo: {
+    parameters: {
+      path: {
+        id: number;
+        fileNo: number;
       };
     };
     responses: {

@@ -147,6 +147,12 @@
 					body: formData as any,
 					bodySerializer: (body) => body
 				});
+			} else if (form[`video__${i}__delete`]?.checked) {
+				rq.msgInfo(`영상 ${i}(을)를 삭제 중 입니다. 잠시만 기다려주세요.`);
+
+				await rq.apiEndPoints().DELETE('/api/v1/posts/{id}/mainVideo/{fileNo}', {
+					params: { path: { id: parseInt($page.params.id), fileNo: i } }
+				});
 			}
 		}
 
@@ -281,7 +287,7 @@
 								<span class="label-text">기존 영상 {videoIndex} 삭제</span>
 							</div>
 							<div>
-								<input class="toggle" type="checkbox" />
+								<input class="toggle" type="checkbox" name={`video__${videoIndex}__delete`} />
 							</div>
 
 							<div>

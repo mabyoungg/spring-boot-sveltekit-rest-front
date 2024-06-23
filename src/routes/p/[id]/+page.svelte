@@ -60,6 +60,7 @@
 	}
 
 	let postComments = $state<components['schemas']['PostCommentDto'][]>([]);
+	let postSubComments = $state<components['schemas']['PostCommentDto'][]>([]);
 
 	async function loadPostComments() {
 		if (import.meta.env.SSR) throw new Error('CSR ONLY');
@@ -71,6 +72,29 @@
 		if (error) throw error;
 
 		postComments = data!.data.items;
+
+		return data!;
+	}
+
+	function showPostSubComments(postCommentId: number) {
+		loadPostSubComments(postCommentId);
+
+		const modal = document.querySelector(`#sub_comments_modal_1`) as HTMLDialogElement;
+
+		modal.showModal();
+	}
+	async function loadPostSubComments(postCommentId: number) {
+		if (import.meta.env.SSR) throw new Error('CSR ONLY');
+
+		const { data, error } = await rq
+			.apiEndPoints()
+			.GET('/api/v1/postComments/{postId}/{postCommentId}/children', {
+				params: { path: { postId: parseInt($page.params.id), postCommentId: postCommentId } }
+			});
+
+		if (error) throw error;
+
+		postSubComments = data!.data.items;
 
 		return data!;
 	}
@@ -330,6 +354,27 @@
 		{:then { }}
 			<h1 class="font-bold text-2xl">댓글</h1>
 
+			<dialog id="sub_comments_modal_1" class="modal">
+				<div class="modal-box">
+					<h3 class="font-bold text-lg">대댓글</h3>
+
+					{#each postSubComments as postComment}
+						<div class="border">
+							<div>번호 : {postComment.id}</div>
+							<div>작성 : {prettyDateTime(postComment.createDate)}</div>
+							<div>수정 : {prettyDateTime(postComment.modifyDate)}</div>
+							<div>작성자 : {postComment.authorName}</div>
+							<div>
+								<img src={postComment.authorProfileImgUrl} width="30" class="rounded-full" alt="" />
+							</div>
+						</div>
+					{/each}
+				</div>
+				<form method="dialog" class="modal-backdrop">
+					<button>close</button>
+				</form>
+			</dialog>
+
 			<div>
 				{#each postComments as postComment}
 					<div class="border">
@@ -365,6 +410,16 @@
 										class="btn btn-outline"
 										on:click={() => (postComment.editing = !postComment.editing)}>수정</button
 									>
+								{/if}
+
+								<button class="btn btn-outline">답글</button>
+
+								{#if postComment.childrenCount > 0}
+									<div>
+										<button class="btn" on:click={() => showPostSubComments(postComment.id)}>
+											총 {postComment.childrenCount}개의 답글
+										</button>
+									</div>
 								{/if}
 							</div>
 						{/if}

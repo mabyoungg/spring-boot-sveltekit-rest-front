@@ -318,142 +318,31 @@
 					</div>
 				</div>
 			</div>
-		{:catch error}
-			{error.msg}
-		{/await}
 
-		<div>
-			<h1 class="font-bold text-2xl">댓글작성</h1>
-
-			<form on:submit|preventDefault={submitWriteCommentForm}>
-				{#if tempPostCommentId == 0}
-					<input type="text" class="input input-bordered" on:click={() => makeTempPostComment()} />
+			<div class="flex flex-col">
+				<button
+					class="btn btn-link"
+					on:click={() => (window.document.querySelector('#post_comment_edit_modal_1') as HTMLDialogElement).showModal()}
+					>댓글 작성</button
+				>
+				{#if post.commentsCount > 0}
+					<button class="btn btn-link">{post.commentsCount} 개의 댓글</button>
+				{:else}
+					<div class="text-center">댓글이 없습니다.</div>
 				{/if}
+			</div>
 
-				{#if tempPostCommentId > 0}
-					<div>
-						<div>내용</div>
-						{#key tempPostCommentId}
-							<ToastUiEditor
-								bind:this={writeCommentToastUiEditor}
-								body={''}
-								saveBody={() => submitWriteCommentForm()}
-							/>
-						{/key}
-					</div>
-
-					<div>
-						<button class="btn btn-outline" type="submit">댓글 작성</button>
-					</div>
-				{/if}
-			</form>
-		</div>
-
-		{#await loadPostComments()}
-			<div>loading...</div>
-		{:then { }}
-			<h1 class="font-bold text-2xl">댓글</h1>
-
-			<dialog id="sub_comments_modal_1" class="modal">
+			<dialog id="post_comment_edit_modal_1" class="modal">
 				<div class="modal-box">
-					<h3 class="font-bold text-lg">대댓글</h3>
-
-					{#each postSubComments as postComment}
-						<div class="border">
-							<div>번호 : {postComment.id}</div>
-							<div>작성 : {prettyDateTime(postComment.createDate)}</div>
-							<div>수정 : {prettyDateTime(postComment.modifyDate)}</div>
-							<div>작성자 : {postComment.authorName}</div>
-							<div>
-								<img src={postComment.authorProfileImgUrl} width="30" class="rounded-full" alt="" />
-							</div>
-						</div>
-					{/each}
+					<h3 class="font-bold text-lg">댓글 작성</h3>
+					<p class="py-4">Press ESC key or click outside to close</p>
 				</div>
 				<form method="dialog" class="modal-backdrop">
 					<button>close</button>
 				</form>
 			</dialog>
-
-			<div>
-				{#each postComments as postComment}
-					<div class="border">
-						<div>번호 : {postComment.id}</div>
-						<div>작성 : {prettyDateTime(postComment.createDate)}</div>
-						<div>수정 : {prettyDateTime(postComment.modifyDate)}</div>
-						<div>작성자 : {postComment.authorName}</div>
-						<div>
-							<img src={postComment.authorProfileImgUrl} width="30" class="rounded-full" alt="" />
-						</div>
-
-						{#if !postComment.editing}
-							<div>
-								{#key postComment.id}
-									<ToastUiEditor body={postComment.body} viewer={true} />
-								{/key}
-							</div>
-
-							<div>
-								{#if postComment.actorCanDelete}
-									<button
-										class="btn btn-outline"
-										on:click={() =>
-											confirmAndDeletePostComment(postComment, (data) => {
-												rq.msgInfo(data.msg);
-												postComments.splice(postComments.indexOf(postComment), 1);
-											})}>삭제</button
-									>
-								{/if}
-
-								{#if postComment.actorCanEdit}
-									<button
-										class="btn btn-outline"
-										on:click={() => (postComment.editing = !postComment.editing)}>수정</button
-									>
-								{/if}
-
-								<button class="btn btn-outline">답글</button>
-
-								{#if postComment.childrenCount > 0}
-									<div>
-										<button class="btn" on:click={() => showPostSubComments(postComment.id)}>
-											총 {postComment.childrenCount}개의 답글
-										</button>
-									</div>
-								{/if}
-							</div>
-						{/if}
-
-						{#if postComment.editing}
-							<div>
-								<form on:submit|preventDefault={() => submitEditCommentForm(postComment.id)}>
-									<input type="hidden" name="id" value={postComment.id} />
-
-									<div>
-										<div>내용</div>
-										{#key postComment.id}
-											<ToastUiEditor
-												bind:this={toastUiEditors[postComment.id]}
-												body={postComment.body}
-												saveBody={() => submitEditCommentForm(postComment.id)}
-											/>
-										{/key}
-									</div>
-
-									<div>
-										<button class="btn btn-outline" type="submit">저장</button>
-										<button
-											type="button"
-											class="btn btn-outline"
-											on:click={() => (postComment.editing = !postComment.editing)}>수정취소</button
-										>
-									</div>
-								</form>
-							</div>
-						{/if}
-					</div>
-				{/each}
-			</div>
+		{:catch error}
+			{error.msg}
 		{/await}
 	</div>
 </div>

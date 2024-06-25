@@ -165,6 +165,7 @@ export interface components {
       childrenCount: number;
       actorCanEdit?: boolean;
       actorCanDelete?: boolean;
+      actorCanReply?: boolean;
       editing?: boolean;
     };
     RsDataEditCommentResponseBody: {

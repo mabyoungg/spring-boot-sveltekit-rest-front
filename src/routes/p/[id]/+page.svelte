@@ -6,13 +6,13 @@
 	import { prettyDateTime } from '$lib/utils';
 	import type { components } from '$lib/types/api/v1/schema';
 
-	const toastUiEditors = $state<Record<number, any>>({});
-
 	let toastUiEditor = $state<any | undefined>();
 	let writeCommentToastUiEditor = $state<any | undefined>();
+	let editCommentToastUiEditor = $state<any | undefined>();
 
 	let tempPostCommentId = $state(0);
 	let post = $state() as components['schemas']['PostWithBodyDto'];
+	let forEditPostComment = $state<components['schemas']['PostCommentDto']>();
 
 	async function loadPost() {
 		if (import.meta.env.SSR) throw new Error('CSR ONLY');
@@ -151,13 +151,13 @@
 		postComments.unshift(data!.data.item);
 		post.commentsCount++;
 
-		(window.document.querySelector('#post_comment_edit_modal_1') as HTMLDialogElement).close();
+		(window.document.querySelector('#post_comment_write_modal_1') as HTMLDialogElement).close();
 	}
 
 	async function submitEditCommentForm(id: number) {
 		// event.preventDefault();
 
-		const toastUiEditor = toastUiEditors[id];
+		const toastUiEditor = editCommentToastUiEditor;
 
 		toastUiEditor.editor.setMarkdown(toastUiEditor.editor.getMarkdown().trim());
 		if (toastUiEditor.editor.getMarkdown().trim().length === 0) {
@@ -179,9 +179,10 @@
 
 		rq.msgInfo(data!.msg);
 
-		const oldPostComment = postComments.find((e) => e.id === id)!;
-		delete toastUiEditors[id];
-		Object.assign(oldPostComment, data!.data.item);
+		Object.assign(forEditPostComment!, data!.data.item);
+
+		const modal = document.querySelector(`#post_comment_edit_modal_1`) as HTMLDialogElement;
+		modal.close();
 	}
 
 	async function makeTempPostComment() {
@@ -227,7 +228,7 @@
 
 	function showWriteCommentForm() {
 		makeTempPostComment();
-		const modal = window.document.querySelector('#post_comment_edit_modal_1') as HTMLDialogElement;
+		const modal = window.document.querySelector('#post_comment_write_modal_1') as HTMLDialogElement;
 		modal.showModal();
 	}
 
@@ -348,7 +349,7 @@
 				{/if}
 			</div>
 
-			<dialog id="post_comment_edit_modal_1" class="modal">
+			<dialog id="post_comment_write_modal_1" class="modal">
 				<div class="modal-box max-w-7xl">
 					<h3 class="font-bold text-lg">댓글 작성</h3>
 					<form on:submit|preventDefault={submitWriteCommentForm}>
@@ -369,6 +370,34 @@
 							</div>
 						{/if}
 					</form>
+				</div>
+				<form method="dialog" class="modal-backdrop">
+					<button>close</button>
+				</form>
+			</dialog>
+
+			<dialog id="post_comment_edit_modal_1" class="modal">
+				<div class="modal-box max-w-7xl">
+					<h3 class="font-bold text-lg">댓글 수정</h3>
+
+					{#if forEditPostComment !== undefined}
+						<form on:submit|preventDefault={() => submitEditCommentForm(forEditPostComment!.id)}>
+							<div>
+								<div>내용</div>
+								{#key forEditPostComment.id}
+									<ToastUiEditor
+										bind:this={editCommentToastUiEditor}
+										body={forEditPostComment.body}
+										saveBody={() => submitEditCommentForm(forEditPostComment!.id)}
+									/>
+								{/key}
+							</div>
+
+							<div>
+								<button class="btn btn-outline" type="submit">저장</button>
+							</div>
+						</form>
+					{/if}
 				</div>
 				<form method="dialog" class="modal-backdrop">
 					<button>close</button>
@@ -396,7 +425,7 @@
 										/>
 									</div>
 									<div>
-										{#key postComment.id}
+										{#key `${postComment.id}__${postComment.modifyDate}`}
 											<ToastUiEditor body={postComment.body} viewer={true} />
 										{/key}
 									</div>
@@ -415,7 +444,15 @@
 											{/if}
 
 											{#if postComment.actorCanEdit}
-												<button class="btn btn-outline">수정</button>
+												<button
+													class="btn btn-outline"
+													on:click={() => {
+														forEditPostComment = postComment;
+														const modal = document.querySelector(`#post_comment_edit_modal_1`) as HTMLDialogElement;
+														modal.showModal();
+													}}
+													>수정</button
+												>
 											{/if}
 
 											{#if postComment.actorCanReply}

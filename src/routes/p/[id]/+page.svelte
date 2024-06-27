@@ -308,7 +308,14 @@
 							<label class="label">
 								<span class="label-text">제목</span>
 							</label>
-							<div>{post.title}</div>
+							<div>
+								{post.title}
+								<div class="tooltip tooltip-right" data-tip="Ctrl + d, Cmd + d">
+									<button class="btn btn-sm" on:click={() => toastUiEditor.toggleFullScreen()}
+										>전체화면</button
+									>
+								</div>
+							</div>
 						</div>
 
 						<div class="form-control col-span-full">
@@ -339,11 +346,11 @@
 
 							{#key post.id}
 								<ToastUiEditor bind:this={toastUiEditor} body={post.body} viewer={true}>
-									<div slot="beforeContent">
+									<div slot="beforeContent" class="visible-on-fullscreen">
 										<!-- svelte-ignore a11y_click_events_have_key_events -->
 										<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 										<h1>
-											제목 : {post.title},
+											{post.title},
 											<div class="tooltip tooltip-right" data-tip="Ctrl + d, Cmd + d">
 												<button class="btn btn-sm" on:click={() => toastUiEditor.toggleFullScreen()}
 													>전체화면</button

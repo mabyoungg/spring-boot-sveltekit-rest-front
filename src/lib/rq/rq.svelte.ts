@@ -28,14 +28,7 @@ class Rq {
 
 		if (!modal.hasAttribute('data-close-listener-added')) {
 			modal.addEventListener('close', () => {
-				this.dialogStack.pop();
-
-				if (this.dialogStack.length > 0) {
-					toastr.options.target = '#' + this.dialogStack[this.dialogStack.length - 1];
-				} else {
-					toastr.options.target = 'body';
-					toastr.options.positionClass = 'toast-top-right';
-				}
+				this.modalClosed(id);
 			});
 
 			modal.setAttribute('data-close-listener-added', 'true');
@@ -44,6 +37,28 @@ class Rq {
 		modal.showModal();
 
 		return modal;
+	}
+
+	public hideModal(id: string) {
+		const modal = document.getElementById(id) as HTMLDialogElement;
+
+		modal.close();
+
+		this.modalClosed(id);
+	}
+
+	public modalClosed(id: string) {
+		// 멱등성 처리
+		if (this.dialogStack[this.dialogStack.length - 1] !== id) return;
+
+		this.dialogStack.pop();
+
+		if (this.dialogStack.length > 0) {
+			toastr.options.target = '#' + this.dialogStack[this.dialogStack.length - 1];
+		} else {
+			toastr.options.target = 'body';
+			toastr.options.positionClass = 'toast-top-right';
+		}
 	}
 
 	public member: components['schemas']['MemberDto'];

@@ -3,12 +3,15 @@
 	import type { components } from '$lib/types/api/v1/schema';
 	import PostCommentEditModal from './PostCommentEditModal.svelte';
 
-	const { post } = $props<{ post: components['schemas']['PostWithBodyDto'] }>();
+	const { post, addPostComment } = $props<{
+		post: components['schemas']['PostWithBodyDto'];
+		addPostComment: (postComment: components['schemas']['PostCommentDto']) => void;
+	}>();
 	const title = `글 "${post.title}" 에 대한 댓글`;
 	let postComment = $state<components['schemas']['PostCommentDto'] | undefined>();
 	let postCommentEditModal = $state() as any;
 
-	async function loadPostComment() {
+	async function loadTempPostComment() {
 		const { data: tempRsData } = await rq
 			.apiEndPoints()
 			.POST('/api/v1/postComments/{postId}/temp', {
@@ -39,11 +42,13 @@
 			}
 		});
 
+		addPostComment(data!.data.item);
+
 		return data!.msg;
 	}
 
 	async function startWrite() {
-		await loadPostComment();
+		await loadTempPostComment();
 
 		postCommentEditModal.showModal();
 	}

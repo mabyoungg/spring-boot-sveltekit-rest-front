@@ -6,11 +6,20 @@
 	import PostCommentWrite from '$lib/business/postComment/PostCommentWrite.svelte';
 	import PostCommentList from '$lib/business/postComment/PostCommentList.svelte';
 
-	const { post } = $props<{ post: components['schemas']['PostWithBodyDto'] }>();
+	const { post: _post } = $props<{
+		post: components['schemas']['PostWithBodyDto'];
+	}>();
+	const post = $state(_post);
 	let postComments = $state<components['schemas']['PostCommentDto'][]>([]);
 
 	function addPostComment(postComment: components['schemas']['PostCommentDto']) {
 		postComments.unshift(postComment);
+		post.commentsCount++;
+	}
+
+	function deletePostComment(postComment: components['schemas']['PostCommentDto']) {
+		postComments.splice(postComments.indexOf(postComment), 1);
+		post.commentsCount--;
 	}
 
 	async function loadPostComments() {
@@ -28,7 +37,7 @@
 	}
 </script>
 
-<h1>댓글</h1>
+<h1>댓글({post.commentsCount})</h1>
 
 <div><span class="text-gray-400">{post.title}</span> 에 대한 댓글</div>
 
@@ -36,7 +45,7 @@
 	loading...
 {:then}
 	<PostCommentWrite {post} {addPostComment} />
-	<PostCommentList {post} {postComments} />
+	<PostCommentList {post} {postComments} {deletePostComment} />
 {:catch error}
 	{error.msg}
 {/await}

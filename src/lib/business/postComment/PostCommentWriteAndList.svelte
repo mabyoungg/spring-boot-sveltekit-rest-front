@@ -22,6 +22,11 @@
 		post.commentsCount--;
 	}
 
+	function modifyPostComment(postComment: components['schemas']['PostCommentDto']) {
+		const idx = postComments.findIndex((v) => v.id == postComment.id);
+		postComments[idx] = postComment;
+	}
+
 	async function loadPostComments() {
 		if (import.meta.env.SSR) throw new Error('CSR ONLY');
 
@@ -45,7 +50,7 @@
 	loading...
 {:then}
 	<PostCommentWrite {post} {addPostComment} />
-	<PostCommentList {post} {postComments} {deletePostComment} />
+	<PostCommentList {post} {postComments} {deletePostComment} {modifyPostComment} />
 {:catch error}
 	{error.msg}
 {/await}

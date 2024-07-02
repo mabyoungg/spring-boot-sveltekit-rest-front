@@ -4,7 +4,7 @@
 
 	const modalId = `post_comment_write_modal_${Math.random().toString(36).substring(2, 9)}`;
 
-	const { post, postComment, title, save } = $props<{
+	const { post, postComment, title, save, submitBtnText } = $props<{
 		save: (
 			post: components['schemas']['PostWithBodyDto'],
 			postComment: components['schemas']['PostCommentDto'],
@@ -13,6 +13,7 @@
 		title: string;
 		post: components['schemas']['PostWithBodyDto'];
 		postComment: components['schemas']['PostCommentDto'];
+		submitBtnText: string;
 	}>();
 
 	export function showModal() {
@@ -72,7 +73,7 @@
 
 			<div class="grid grid-cols-2 gap-4">
 				<button class="btn btn-outline" type="button" on:click={hideModal}>취소</button>
-				<button class="btn btn-primary" type="submit">댓글 작성</button>
+				<button class="btn btn-primary" type="submit">{submitBtnText}</button>
 			</div>
 		</form>
 	</div>

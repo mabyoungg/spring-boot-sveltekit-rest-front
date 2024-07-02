@@ -2,6 +2,8 @@
 	import rq from '$lib/rq/rq.svelte';
 	import type { components } from '$lib/types/api/v1/schema';
 
+	const modalId = `post_comment_write_modal_${Math.random().toString(36).substring(2, 9)}`;
+
 	const { post, postComment, title, save } = $props<{
 		save: (
 			post: components['schemas']['PostWithBodyDto'],
@@ -14,7 +16,7 @@
 	}>();
 
 	export function showModal() {
-		const modal = rq.showModal('post_comment_write_modal');
+		const modal = rq.showModal(modalId);
 
 		const inputBody = modal.querySelector('form input[type=text]') as HTMLInputElement;
 
@@ -22,7 +24,7 @@
 	}
 
 	function hideModal() {
-		rq.hideModal('post_comment_write_modal');
+		rq.hideModal(modalId);
 	}
 
 	async function submitWriteForm(this: HTMLFormElement) {
@@ -47,7 +49,7 @@
 	}
 </script>
 
-<dialog id="post_comment_write_modal" class="modal">
+<dialog id={modalId} class="modal">
 	<div class="modal-box">
 		<form method="dialog">
 			<button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
